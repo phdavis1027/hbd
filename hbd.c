@@ -61,13 +61,15 @@ int parse(char **args)
     while(*args){
 
         if(strcmp(*args, start)==0){
-            char *listening = check_config("listening");
+            char *listening = checkconfig("listening");
+            printf("HOLY MACKEREL\n");
             if(strcmp(listening, "yes") == 0){
+                printf("HOLY MACKEREL\n");
                 printf("hbd is already listening.\n");
             }else if(strcmp(listening, "no") == 0){
                 hbdlisten();
-
-                printf("hbd will now listen for birthdays and notify you at %s");
+                char *notice_time = checkconfig("notice_time");
+                printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
             }
         }
 
@@ -100,14 +102,16 @@ int parse(char **args)
 
     if(w){
         if(!rec){
-            printf("Whose birthday is it?");
+            printf("Whose birthday is it? ");
             scanf("%s", inrec);
         }
 
         if(!date){
-            printf("When is the birthday?");
-            validate(indate);
-            scanf("%s", indate);
+            printf("When is the birthday? ");
+            scanf("%256s", indate);
+            if(validate(indate) != 0){
+                return retval;
+            }
         }
 
         writebday(inrec, indate);
@@ -213,10 +217,11 @@ char *checkconfig(const char *param)
         char *line_copy; //shouldn't need buffering since users oughtn't interface with the config file directly
         strcpy(line_copy, line);
 
-        const char *delim = ':';
-        char *current = strtok(line_copy, delim);
+        const char delim = ':';
+        const char *ptr = &delim;
+        char *current = strtok(line_copy, ptr);
         if(strcmp(current, param) == 0){
-            char *value = strtok(NULL,delim);
+            char *value = strtok(NULL,ptr);
             strncpy(resp, value, ret_size);
             fclose(config);
             if(line)
@@ -226,16 +231,19 @@ char *checkconfig(const char *param)
 
     }
 
-    if(resp[0] == 0){
+    char *something = "listening";
+
+    if(resp[0] == 0 && strcmp(param, something) != 0){
         printf("Could not find config entry for %s\n", param);
         printf("Please enter one now.");
-        char def[ret_size];
+        char *def = (char *) calloc(sizeof(char), ret_size);
         scanf("%256s",def);
-
+        return def;
     }
 
-    fclose(config);
-    if(line)
-        free(line);
+    //fclose(config);
+    //if(line)
+     //   free(line);
 
+     return NULL;
 }
