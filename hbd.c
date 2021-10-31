@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "hbd.h"
+#include <regex.h>
 #define to "to"
 #define on "on"
 
@@ -64,6 +65,7 @@ int parse(char **args)
         if(strcmp(*args, on) == 0){
             w = 1;
             date = *(++args);
+            validate(date);
         }
 
         ++args;
@@ -79,6 +81,7 @@ int parse(char **args)
         if(!date){
             printf("When is the birthday?");
             scanf("%s", indate);
+            validate(indate);
             date = indate;
         }
 
@@ -94,5 +97,23 @@ void writebday(const char *who, const char *when){
 
     FILE *bdays = fopen("./storage/bdays.txt","a");
     fprintf(bdays,"%s:%s\n",who,when);
+    fclose(bdays);
 
+}
+
+int validate(const char *date){
+
+    regex_t date_re;
+    regmatch_t p_match[1];
+
+    if(regcomp(&date_re, "((1)|(2)|(3)|(4)|(5)|(6)|(7)|(8)|(9)|(10)|(11)|(12))/(([0-2][0-9])|(3[01]))", REG_EXTENDED != 0)){
+        printf("Oh no!\n");
+    }
+
+    int match = regexec(&date_re, date, 1, p_match, 0);
+
+    if(match != 0)
+        printf("No match\n");
+
+    return 0;
 }
