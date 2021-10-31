@@ -62,9 +62,11 @@ int parse(char **args)
 
         if(strcmp(*args, start)==0){
             char *listening = checkconfig("listening");
-            printf("HOLY MACKEREL\n");
+            if(listening == NULL){
+                writeconfig("listening", "yes");
+                hbdlisten();
+            }
             if(strcmp(listening, "yes") == 0){
-                printf("HOLY MACKEREL\n");
                 printf("hbd is already listening.\n");
             }else if(strcmp(listening, "no") == 0){
                 hbdlisten();
@@ -231,9 +233,8 @@ char *checkconfig(const char *param)
 
     }
 
-    char *something = "listening";
 
-    if(resp[0] == 0 && strcmp(param, something) != 0){
+    if(resp[0] == 0 && strcmp(param, "listening") != 0){
         printf("Could not find config entry for %s\n", param);
         printf("Please enter one now.");
         char *def = (char *) calloc(sizeof(char), ret_size);
@@ -241,9 +242,10 @@ char *checkconfig(const char *param)
         return def;
     }
 
-    //fclose(config);
-    //if(line)
-     //   free(line);
+    fclose(config);
+    if(line)
+       free(line);
 
-     return NULL;
+    return NULL;
 }
+
