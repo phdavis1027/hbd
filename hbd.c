@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <time.h>
 #include "hbd.h"
+#define CONFIG_PATH "/Users/phillipdavis/Desktop/c-programs/hbd/storage/config.txt"
 #define to "to"
 #define on "on"
 #define clear "clear"
@@ -38,6 +39,8 @@ int send(char *msg)
 
 int main(int argc, char **argv) //main is only ever called to parse a command line call
 {
+
+
     parse(argv); 
     return (0);    
 }
@@ -62,7 +65,7 @@ int parse(char **args)
 
         if(strcmp(*args, start)==0){
             void *listening = checkconfig("listening");
-            if(listening == NULL){
+            if((char*)listening == NULL){
                 writeconfig("listening", "yes");
                 hbdlisten();
                 char *notice_time = checkconfig("notice_time");
@@ -75,6 +78,7 @@ int parse(char **args)
             }else if(strcmp((char*)listening, "no") == 0){
                 hbdlisten();
                 char *notice_time = checkconfig("notice_time");
+                editconfig("listening","yes");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
             }
         }
@@ -131,7 +135,7 @@ int parse(char **args)
 void writebday(const char *who, const char *when)
 {
 
-    FILE *bdays = fopen("./storage/bdays.txt","a");
+    FILE *bdays = fopen(CONFIG_PATH,"a");
     fprintf(bdays,"%s:%s\n",who,when);
     fclose(bdays);
 
@@ -139,7 +143,7 @@ void writebday(const char *who, const char *when)
 
 void clearbdays()
 {
-    FILE *bdays = fopen("./storage/bdays.txt","w");
+    FILE *bdays = fopen(CONFIG_PATH,"w");
     fclose(bdays);
 }
 
@@ -208,7 +212,7 @@ char *checkconfig(const char *param)
     size_t len = 0;
 
 
-    FILE *config = fopen("./storage/config.txt","r");
+    FILE *config = fopen(CONFIG_PATH,"r");
     if(config == NULL){
         fprintf(stderr,"Can't find config file. Please add one in this program's storage directory.\n");
         exit(1);
@@ -216,29 +220,32 @@ char *checkconfig(const char *param)
 
     while((keep_reading = getline(&line, &len, config)) != -1){
 
-        char line_copy[100]; //shouldn't need buffering since users oughtn't interface with the config file directly
+        char line_copy[1024]; //shouldn't need buffering since users oughtn't interface with the config file directly
         strcpy(line_copy, line);
 
-        char delim = ':';
-        char *ptr = &delim;
-        char *current = strtok(line_copy, ptr);
+
+        printf("%s",line_copy);
+        const char delim[2] = ":";
+        char *current = strtok(line_copy, delim);
+        printf("------\n");
+        printf("%s\n",line_copy);
         if(strcmp(current, param) == 0){
-            char *value = strtok(NULL,ptr);
+            char *value = strtok(NULL,delim);
             strcpy(resp, value);
             fclose(config);
-            if(line)
-                free(line);
+            free(line);
             return resp;
         }
 
     }
 
 
-    if(resp[0] == 0 && strcmp(param, "listening") != 0){
+    if(strcmp(param,"notice_time")==0){
         printf("Could not find config entry for %s\n", param);
         printf("Please enter one now. ");
         char *def = (char *) calloc(sizeof(char), ret_size);
         scanf("%256s",def);
+        writeconfig(param,def);
         return def;
     }
 
@@ -251,7 +258,7 @@ char *checkconfig(const char *param)
 
 int writeconfig(const char * key, const char * val)
 {
-    FILE *config = fopen("./storage/config.txt","a");
+    FILE *config = fopen(CONFIG_PATH,"a");
     fprintf(config, "%s:%s\n",key,val);
     fclose(config);
     return 0;
@@ -261,5 +268,31 @@ int editconfig(const char * key, const char * val)
 {
     FILE *new_config = fopen("./storage/newconfig.txt","w");
     FILE *old_config = fopen("./storage/config.txt","r");
+    
+    int keep_reading;
+    char *line;
+    size_t len;
+
+    while((keep_reading = getline(&line, &len, old_config)) != -1){
+        char line_copy[100];        
+        strcpy(line_copy, line);
+
+        char delim = ':';
+        char *ptr = &delim;
+        char *current = strtok(line_copy, ptr);
+
+        if(strcmp(current, key) == 0){
+            fprintf(new_config,"%s:%s", key, val);
+        }else{
+            fprintf(old_config,"%s",line);
+        }
+    }
+
+    fclose(old_config);
+    remove("./storage/config.txt");
+
+    fclose(new_config);
+    rename("./storage/newconfig.txt","./storage/config.txt");
+
     return 0;
 }
