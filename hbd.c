@@ -71,36 +71,40 @@ int parse(char **args)
             void *listening = checkconfig("listening");
             if((char*)listening == NULL){
                 writeconfig("listening", "yes");
-                hbdlisten();
                 char *notice_time = checkconfig("notice_time");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
                 return 0;
             }
 
 
-            stripnewline(listening);
 
             if(strcmp((char*)listening, "yes") == 0){
                 printf("hbd is already listening.\n");
             }else if(strcmp((char*)listening, "no") == 0){
-                hbdlisten();
                 char *notice_time = checkconfig("notice_time");
                 editconfig("listening","yes");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
             }
 
-            printf("%d",strcmp((char*)listening, "no"));
         }
 
         if(strcmp(*args, stop)==0){
             void *listening = checkconfig("listening");
             
-            if (listening = NULL){
+            if (listening == NULL){
                 writeconfig("listening","no");
-                printf("hbd will no longer alert you for birthdays");
+                printf("hbd will not alert you for birthdays\n");
             }
 
-            stripnewline(listening);
+
+            if(strcmp(listening,"no") == 0){
+                printf("hbd not listening\n");
+            }
+
+            if(strcmp(listening,"yes")==0){
+                editconfig(listening, "no");
+                printf("hbd will not alert you for birthdays\n");
+            }
         }
 
         if(strcmp(*args, clear)==0){
@@ -215,7 +219,7 @@ int validate(char *date)
     return 0;
 }
 
-void hbdlisten()
+void check()
 {
     time_t sys_time;
     time(&sys_time);
@@ -251,6 +255,7 @@ char *checkconfig(const char *param)
             strcpy(resp, value);
             fclose(config);
             free(line);
+            stripnewline(resp);
             return resp;
         }
 
@@ -283,25 +288,30 @@ int writeconfig(const char * key, const char * val)
 
 int editconfig(const char * key, const char * val)
 {
-    FILE *new_config = fopen("./storage/newconfig.txt","w");
+
     FILE *old_config = fopen("./storage/config.txt","r");
+    FILE *new_config = fopen("./storage/newconfig.txt","w");
     
     int keep_reading;
-    char *line;
-    size_t len;
+    char *line = NULL;
+    size_t len = 1;
 
     while((keep_reading = getline(&line, &len, old_config)) != -1){
+        printf("%s",line);
         char line_copy[100];        
         strcpy(line_copy, line);
 
         char delim = ':';
         char *ptr = &delim;
-        char *current = strtok(line_copy, ptr);
+        char *current_entry = strtok(line_copy, ptr);
 
-        if(strcmp(current, key) == 0){
+
+        if(strcmp(current_entry, key) == 0){
+            printf("Does it happen before this\n");
             fprintf(new_config,"%s:%s", key, val);
+            printf("or after?\n");
         }else{
-            fprintf(old_config,"%s",line);
+            fprintf(new_config,"%s:%s",line,strtok(NULL,ptr));
         }
     }
 
