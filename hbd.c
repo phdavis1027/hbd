@@ -67,6 +67,9 @@ int parse(char **args)
 
     while(*args){
 
+        if (strcmp(*args, "check") == 0)
+            check();
+
         if(strcmp(*args, start)==0){
             void *listening = checkconfig("listening");
             if((char*)listening == NULL){
@@ -221,6 +224,7 @@ int validate(char *date)
 
 void check()
 {
+    printf("checking\n");
     time_t sys_time;
     time(&sys_time);
     struct tm *time;
@@ -294,10 +298,9 @@ int editconfig(const char * key, const char * val)
     
     int keep_reading;
     char *line = NULL;
-    size_t len = 1;
+    size_t len = 0;
 
     while((keep_reading = getline(&line, &len, old_config)) != -1){
-        printf("%s",line);
         char line_copy[100];        
         strcpy(line_copy, line);
 
@@ -307,11 +310,9 @@ int editconfig(const char * key, const char * val)
 
 
         if(strcmp(current_entry, key) == 0){
-            printf("Does it happen before this\n");
-            fprintf(new_config,"%s:%s", key, val);
-            printf("or after?\n");
+            fprintf(new_config,"%s:%s\n", key, val);
         }else{
-            fprintf(new_config,"%s:%s",line,strtok(NULL,ptr));
+            fprintf(new_config,"%s:%s\n",line,strtok(NULL,ptr));
         }
     }
 
@@ -328,4 +329,13 @@ int editconfig(const char * key, const char * val)
 void stripnewline(char *input)
 {
     input[strcspn(input,"\n")] = 0;
+}
+
+void startlistening()
+{
+    char * magic_word = "hbd check";
+    char * cmdformat = "(cron -l ; echo '%s') | crontab -";
+    char cmd[50]; 
+    sprintf(cmd, cmdformat, magic_word);
+    system(cmd);
 }
