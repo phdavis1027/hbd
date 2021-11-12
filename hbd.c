@@ -106,8 +106,8 @@ int parse(char **args)
             }
 
             if(strcmp(listening,"yes")==0){
+                stoplistening();
                 editconfig(listening, "no");
-
                 printf("hbd will not alert you for birthdays\n");
             }
         }
@@ -348,7 +348,7 @@ void startlistening()
 void stoplistening()
 {
     char * magic_word = "hbd check";
-    char * cmdformat = "crontab -l | grep '%s' | crontab - ";
+    char * cmdformat = "crontab -l | grep -v '%s' | crontab - ";
     char cmd[200];
     sprintf(cmd, cmdformat, magic_word);
     system(cmd);
