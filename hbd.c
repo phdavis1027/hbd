@@ -68,15 +68,12 @@ int parse(char **args)
 
 
 
-        if(strcmp(*args, _check)==0){
-            check();
-            break;
-        }
 
         if(strcmp(*args, start)==0){
             printf("I'm here\n");
             void *listening = checkconfig("listening");
             if((char*)listening == NULL){
+                startlistening();
                 writeconfig("listening", "yes");
                 char *notice_time = checkconfig("notice_time");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
@@ -88,6 +85,7 @@ int parse(char **args)
                 printf("hbd is already listening.\n");
             }else if(strcmp((char*)listening, "no") == 0){
                 char *notice_time = checkconfig("notice_time");
+                startlistening();
                 editconfig("listening","yes");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
             }
@@ -340,9 +338,10 @@ void stripnewline(char *input)
 void startlistening()
 {
     char * magic_word = "hbd check";
-    char * cmdformat = "(cron -l ; 23 * * * * echo '%s') | crontab -";
-    char cmd[50]; 
-    sprintf(cmd, cmdformat, magic_word);
+    char * cmdformat = "(crontab -l ; echo '%s * * * * %s') | crontab -";
+    char cmd[200]; 
+    sprintf(cmd, cmdformat, checkconfig("notice_time"), magic_word);
+    printf("%s\n",cmd);
     system(cmd);
 }
 
@@ -350,7 +349,7 @@ void stoplistening()
 {
     char * magic_word = "hbd check";
     char * cmdformat = "crontab -l | grep '%s' | crontab - ";
-    char cmd[50];
+    char cmd[200];
     sprintf(cmd, cmdformat, magic_word);
     system(cmd);
 }
