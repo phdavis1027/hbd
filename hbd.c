@@ -11,6 +11,7 @@
 #define clear "clear"
 #define start "start"
 #define stop "stop"
+#define _check "check"
 
 
 
@@ -43,8 +44,6 @@ int send(char *msg)
 
 int main(int argc, char **argv) //main is only ever called to parse a command line call
 {
-
-
     parse(argv); 
     return (0);    
 }
@@ -67,16 +66,20 @@ int parse(char **args)
 
     while(*args){
 
-        if (strcmp(*args, "check") == 0)
+
+
+        if(strcmp(*args, _check)==0){
             check();
+            break;
+        }
 
         if(strcmp(*args, start)==0){
+            printf("I'm here\n");
             void *listening = checkconfig("listening");
             if((char*)listening == NULL){
                 writeconfig("listening", "yes");
                 char *notice_time = checkconfig("notice_time");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
-                return 0;
             }
 
 
@@ -106,6 +109,7 @@ int parse(char **args)
 
             if(strcmp(listening,"yes")==0){
                 editconfig(listening, "no");
+
                 printf("hbd will not alert you for birthdays\n");
             }
         }
@@ -229,6 +233,7 @@ void check()
     time(&sys_time);
     struct tm *time;
     time = localtime(&sys_time);
+
 }
 
 char *checkconfig(const char *param)
@@ -247,6 +252,7 @@ char *checkconfig(const char *param)
     }
 
     while((keep_reading = getline(&line, &len, config)) != -1){
+
 
         char line_copy[1024]; //shouldn't need buffering since users oughtn't interface with the config file directly
         strcpy(line_copy, line);
@@ -334,8 +340,17 @@ void stripnewline(char *input)
 void startlistening()
 {
     char * magic_word = "hbd check";
-    char * cmdformat = "(cron -l ; echo '%s') | crontab -";
+    char * cmdformat = "(cron -l ; 23 * * * * echo '%s') | crontab -";
     char cmd[50]; 
+    sprintf(cmd, cmdformat, magic_word);
+    system(cmd);
+}
+
+void stoplistening()
+{
+    char * magic_word = "hbd check";
+    char * cmdformat = "crontab -l | grep '%s' | crontab - ";
+    char cmd[50];
     sprintf(cmd, cmdformat, magic_word);
     system(cmd);
 }

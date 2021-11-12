@@ -1,10 +1,2 @@
 listening:yes
-:yes
-
-:yes
-:(null)
 notice_time:20
-:20
-
-:20
-:(null)
