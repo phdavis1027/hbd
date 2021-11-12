@@ -10,6 +10,10 @@
 #define on "on"
 #define clear "clear"
 #define start "start"
+#define stop "stop"
+
+
+
 
 //I really have no idea what's going on or why it won't work
 //But I think I might just have to go ahead and use sendmail
@@ -73,6 +77,9 @@ int parse(char **args)
                 return 0;
             }
 
+
+            stripnewline(listening);
+
             if(strcmp((char*)listening, "yes") == 0){
                 printf("hbd is already listening.\n");
             }else if(strcmp((char*)listening, "no") == 0){
@@ -81,6 +88,19 @@ int parse(char **args)
                 editconfig("listening","yes");
                 printf("hbd will now listen for birthdays and notify you at %s\n", notice_time);
             }
+
+            printf("%d",strcmp((char*)listening, "no"));
+        }
+
+        if(strcmp(*args, stop)==0){
+            void *listening = checkconfig("listening");
+            
+            if (listening = NULL){
+                writeconfig("listening","no");
+                printf("hbd will no longer alert you for birthdays");
+            }
+
+            stripnewline(listening);
         }
 
         if(strcmp(*args, clear)==0){
@@ -224,11 +244,8 @@ char *checkconfig(const char *param)
         strcpy(line_copy, line);
 
 
-        printf("%s",line_copy);
         const char delim[2] = ":";
         char *current = strtok(line_copy, delim);
-        printf("------\n");
-        printf("%s\n",line_copy);
         if(strcmp(current, param) == 0){
             char *value = strtok(NULL,delim);
             strcpy(resp, value);
@@ -295,4 +312,10 @@ int editconfig(const char * key, const char * val)
     rename("./storage/newconfig.txt","./storage/config.txt");
 
     return 0;
+}
+
+
+void stripnewline(char *input)
+{
+    input[strcspn(input,"\n")] = 0;
 }

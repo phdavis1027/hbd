@@ -7,3 +7,4 @@ void hbdlisten();
 char *checkconfig(const char*);
 int writeconfig(const char*, const char*);
 int editconfig(const char*,const char*);
+void stripnewline(char *);

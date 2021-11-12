@@ -1,11 +1,2 @@
 listening:yes
 notice_time:20
-listening:yes
-listening:yes
-listening:yes
-listening:yes
-listening:yes
-listening:yes
-listening:yes
-listening:yes
-listening:yes
