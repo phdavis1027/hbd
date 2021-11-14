@@ -6,6 +6,7 @@
 #include <time.h>
 #include "hbd.h"
 #define CONFIG_PATH "/Users/phillipdavis/Desktop/c-programs/hbd/storage/config.txt"
+#define BDAYS_PATH "/Users/phillipdavis/Desktop/c-programs/hbd/storage/bdays.txt"
 #define to "to"
 #define on "on"
 #define clear "clear"
@@ -164,7 +165,7 @@ int parse(char **args)
 void writebday(const char *who, const char *when)
 {
 
-    FILE *bdays = fopen(CONFIG_PATH,"a");
+    FILE *bdays = fopen(BDAYS_PATH,"a");
     fprintf(bdays,"%s:%s\n",who,when);
     fclose(bdays);
 
@@ -300,7 +301,7 @@ int editconfig(const char * key, const char * val)
     FILE *old_config = fopen("./storage/config.txt","r");
     FILE *new_config = fopen("./storage/newconfig.txt","w");
     
-    int keep_reading;
+    int keep_reading = 0;
     char *line = NULL;
     size_t len = 0;
 
@@ -316,7 +317,9 @@ int editconfig(const char * key, const char * val)
         if(strcmp(current_entry, key) == 0){
             fprintf(new_config,"%s:%s\n", key, val);
         }else{
-            fprintf(new_config,"%s:%s\n",line,strtok(NULL,ptr));
+            char * old_val = strtok(NULL,ptr);
+            stripnewline(old_val);
+            fprintf(new_config,"%s:%s\n",line,old_val);
         }
     }
 
