@@ -342,9 +342,8 @@ void startlistening()
 {
     char * magic_word = "hbd check";
     char * cmdformat = "(crontab -l ; echo '%s * * * * %s') | crontab -";
-    char cmd[200]; 
+    char cmd[300]; 
     sprintf(cmd, cmdformat, checkconfig("notice_time"), magic_word);
-    printf("%s\n",cmd);
     system(cmd);
 }
 
@@ -352,7 +351,7 @@ void stoplistening()
 {
     char * magic_word = "hbd check";
     char * cmdformat = "crontab -l | grep -v '%s' | crontab - ";
-    char cmd[200];
+    char cmd[300];
     sprintf(cmd, cmdformat, magic_word);
     system(cmd);
 }
