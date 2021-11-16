@@ -232,6 +232,19 @@ void check()
     struct tm *time;
     time = localtime(&sys_time);
 
+    int month = time->tm_mon;
+    int day = time->tm_mday;
+    char target[10];
+    sprintf(target,"%s:%s",month,day);    
+    
+    FILE *bdays = fopen(BDAYS_PATH, "r");
+
+
+    char *line = NULL;
+    ssize_t keep_reading;
+    size_t len = 0;
+
+
 }
 
 char *checkconfig(const char *param)
