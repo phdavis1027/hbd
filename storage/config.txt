@@ -1,4 +1,2 @@
 listening:yes
-:yes
-notice_time:23:23
-:23
+notice_time:23

@@ -107,8 +107,7 @@ int parse(char **args)
             }
 
             if(strcmp(listening,"yes")==0){
-                stoplistening();
-                editconfig(listening, "no");
+                editconfig("listening", "no");
                 printf("hbd will not alert you for birthdays\n");
             }
         }
@@ -306,7 +305,7 @@ int editconfig(const char * key, const char * val)
     size_t len = 0;
 
     while((keep_reading = getline(&line, &len, old_config)) != -1){
-        char line_copy[100];        
+        char line_copy[200];        
         strcpy(line_copy, line);
 
         char delim = ':';
@@ -314,12 +313,13 @@ int editconfig(const char * key, const char * val)
         char *current_entry = strtok(line_copy, ptr);
 
 
+        printf("%s, %s : %d--\n",current_entry, key, strcmp(current_entry, key));
         if(strcmp(current_entry, key) == 0){
             fprintf(new_config,"%s:%s\n", key, val);
         }else{
             char * old_val = strtok(NULL,ptr);
             stripnewline(old_val);
-            fprintf(new_config,"%s:%s\n",line,old_val);
+            fprintf(new_config,"%s:%s\n",current_entry,old_val);
         }
     }
 
