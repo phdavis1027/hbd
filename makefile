@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Werror -mmacosx-version-min=11.5 -lpthread
+CFLAGS = -Wall -Werror -lpthread
 COMPILER = gcc
 
 compile: 

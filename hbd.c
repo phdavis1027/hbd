@@ -60,14 +60,15 @@ int parse(char **args)
 
     while(*args){
 
+	printf("%s", *args);
         if(strcmp(*args, start)==0){
-            char *listening = check_config("listening");
+            char *listening = checkconfig("listening");
             if(strcmp(listening, "yes") == 0){
                 printf("hbd is already listening.\n");
             }else if(strcmp(listening, "no") == 0){
                 hbdlisten();
 
-                printf("hbd will now listen for birthdays and notify you at %s");
+                printf("hbd will now listen for birthdays and notify you at your chosen time.\n");
             }
         }
 
@@ -86,6 +87,7 @@ int parse(char **args)
             w = 1;
             rec = *(++args);
             strcpy(inrec,rec);
+	    printf("inrec : %s", inrec);
         }
 
         if(strcmp(*args, on) == 0){
@@ -99,8 +101,9 @@ int parse(char **args)
     }
 
     if(w){
+	printf("got here\n");
         if(!rec){
-            printf("Whose birthday is it?");
+            printf("Whose birthday is it? ");
             scanf("%s", inrec);
         }
 
@@ -213,10 +216,11 @@ char *checkconfig(const char *param)
         char *line_copy; //shouldn't need buffering since users oughtn't interface with the config file directly
         strcpy(line_copy, line);
 
-        const char *delim = ':';
-        char *current = strtok(line_copy, delim);
+	const char delim = ':';
+	const char * restrict delim_addr = &delim;
+        char *current = strtok(line_copy, delim_addr);
         if(strcmp(current, param) == 0){
-            char *value = strtok(NULL,delim);
+            char *value = strtok(NULL,delim_addr);
             strncpy(resp, value, ret_size);
             fclose(config);
             if(line)
